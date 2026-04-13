@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aero Flight Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #1a1918;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        #globe-container {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #ffffff 0%, #e8e4df 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            width: 380px;
+            background: #ffffff;
+            border-left: 1px solid #d4d0cb;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.03);
+            z-index: 10;
+        }
+
+        .panel-header {
+            padding: 2rem;
+            border-bottom: 1px solid #d4d0cb;
+        }
+
+        .panel-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .panel-header p {
+            color: #8a8580;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-top: 0.5rem;
+        }
+
+        .flight-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .flight-card {
+            background: #f8f7f4;
+            border: 1px solid #e8e4df;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .flight-card:hover, .flight-card.active {
+            background: #1a1918;
+            color: #ffffff;
+            border-color: #1a1918;
+            transform: translateX(-5px);
+        }
+
+        .flight-card:hover .route-airport, .flight-card.active .route-airport { color: #8a8580; }
+        .flight-card:hover .status, .flight-card.active .status { color: #f8f7f4; }
+        
+        .route {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .route-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .route-airport {
+            font-size: 0.7rem;
+            color: #8a8580;
+            text-transform: uppercase;
+            margin-top: 0.2rem;
+        }
+
+        .route-path {
+            flex: 1;
+            margin: 0 1rem;
+            height: 1px;
+            background: currentColor;
+            opacity: 0.2;
+            position: relative;
+        }
+        
+        .route-path::after {
+            content: '✈';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1rem;
+        }
+
+        .flight-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .status {
+            color: #1a1918;
+            font-weight: 600;
+        }
+
+        .time {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Overlay text on canvas */
+        .canvas-overlay {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            font-size: 0.8rem;
+            color: #a8a29e;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="globe-container">
+        <canvas id="globe"></canvas>
+        <div class="canvas-overlay">Live Global Traffic (Simulation)</div>
+    </div>
+
+    <div class="side-panel">
+        <div class="panel-header">
+            <h1>Aero Tracker</h1>
+            <p>Active Routes</p>
+        </div>
+        <div class="flight-list">
+            
+            <div class="flight-card active">
+                <div class="route">
+                    <div>
+                        <div class="route-code">JFK</div>
+                        <div class="route-airport">New York</div>
+                    </div>
+                    <div class="route-path"></div>
+                    <div style="text-align: right;">
+                        <div class="route-code">LHR</div>
+                        <div class="route-airport">London</div>
+                    </div>
+                </div>
+                <div class="flight-details">
+                    <span class="status">In Air • Alt 35k ft</span>
+                    <span class="time">06:45h</span>
+                </div>
+            </div>
+
+            <div class="flight-card">
+                <div class="route">
+                    <div>
+                        <div class="route-code">NRT</div>
+                        <div class="route-airport">Tokyo</div>
+                    </div>
+                    <div class="route-path" style="opacity:0.1"></div>
+                    <div style="text-align: right;">
+                        <div class="route-code">SFO</div>
+                        <div class="route-airport">San Francisco</div>
+                    </div>
+                </div>
+                <div class="flight-details">
+                    <span class="status">Boarding</span>
+                    <span class="time">09:20h</span>
+                </div>
+            </div>
+
+            <div class="flight-card">
+                <div class="route">
+                    <div>
+                        <div class="route-code">DXB</div>
+                        <div class="route-airport">Dubai</div>
+                    </div>
+                    <div class="route-path"></div>
+                    <div style="text-align: right;">
+                        <div class="route-code">CDG</div>
+                        <div class="route-airport">Paris</div>
+                    </div>
+                </div>
+                <div class="flight-details">
+                    <span class="status">Descending</span>
+                    <span class="time">07:15h</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Custom 3D Dot Matrix Globe rendering on Canvas
+        const canvas = document.getElementById('globe');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('globe-container');
+
+        let width, height;
+        let rotationX = 0.2;
+        let rotationY = 0;
+        const radius = 250;
+        const nodes = [];
+        const arcs = [];
+
+        function resize() {
+            // Prevent setting canvas to 0x0 if container is hidden/loading
+            if (container.clientWidth === 0 || container.clientHeight === 0) return;
+            
+            width = container.clientWidth;
+            height = container.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        // Use ResizeObserver for reliable resizing, especially inside iframes
+        const resizeObserver = new ResizeObserver(() => {
+            resize();
+        });
+        resizeObserver.observe(container);
+
+        // Initial attempt
+        resize();
+
+        // Generate points on a sphere (Fibonacci lattice)
+        const numNodes = 1200;
+        const phi = Math.PI * (3 - Math.sqrt(5)); // golden angle
+
+        for (let i = 0; i < numNodes; i++) {
+            const y = 1 - (i / (numNodes - 1)) * 2; // y from 1 to -1
+            const r = Math.sqrt(1 - y * y); // radius at y
+            const theta = phi * i; // golden angle increment
+
+            const x = Math.cos(theta) * r;
+            const z = Math.sin(theta) * r;
+
+            nodes.push({ x, y, z });
+        }
+        
+        // Generate a few random flight arcs
+        for(let i=0; i<8; i++){
+            const startNode = nodes[Math.floor(Math.random() * nodes.length)];
+            const endNode = nodes[Math.floor(Math.random() * nodes.length)];
+            arcs.push({ start: startNode, end: endNode, progress: Math.random() });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            rotationY += 0.003; // Auto rotate
+            
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            const cosX = Math.cos(rotationX);
+            const sinX = Math.sin(rotationX);
+            const cosY = Math.cos(rotationY);
+            const sinY = Math.sin(rotationY);
+
+            // Draw solid background sphere to give volume
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(168, 162, 158, 0.3)';
+            ctx.stroke();
+
+            // Draw Nodes
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+
+                // Rotate around Y
+                let x1 = node.x * cosY - node.z * sinY;
+                let z1 = node.z * cosY + node.x * sinY;
+
+                // Rotate around X
+                let y1 = node.y * cosX - z1 * sinX;
+                let z2 = z1 * cosX + node.y * sinX;
+
+                // Only draw front half of sphere to simulate solid object
+                if (z2 > 0) {
+                    const screenX = centerX + x1 * radius;
+                    const screenY = centerY + y1 * radius;
+                    
+                    // Depth cueing
+                    const size = 1.5 + (z2 * 0.8);
+                    const opacity = 0.3 + (z2 * 0.6);
+
+                    ctx.fillStyle = `rgba(138, 133, 128, ${opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Draw Flight Arcs
+            for(let i=0; i<arcs.length; i++) {
+                const arc = arcs[i];
+                arc.progress += 0.005;
+                if(arc.progress > 1) arc.progress = 0;
+                
+                // Interpolate position along great circle (simplified for demo as linear interpolation with height)
+                const pX = arc.start.x + (arc.end.x - arc.start.x) * arc.progress;
+                const pY = arc.start.y + (arc.end.y - arc.start.y) * arc.progress;
+                const pZ = arc.start.z + (arc.end.z - arc.start.z) * arc.progress;
+                
+                // normalize and add altitude (arc shape)
+                const mag = Math.sqrt(pX*pX + pY*pY + pZ*pZ);
+                // Altitude peaks at 1.2x radius at middle of journey (0.5 progress)
+                const alt = 1 + Math.sin(arc.progress * Math.PI) * 0.2; 
+                
+                const finalX = (pX/mag) * alt;
+                const finalY = (pY/mag) * alt;
+                const finalZ = (pZ/mag) * alt;
+                
+                // Rotate
+                let x1 = finalX * cosY - finalZ * sinY;
+                let z1 = finalZ * cosY + finalX * sinY;
+                let y1 = finalY * cosX - z1 * sinX;
+                let z2 = z1 * cosX + finalY * sinX;
+                
+                if(z2 > 0) {
+                    const screenX = centerX + x1 * radius;
+                    const screenY = centerY + y1 * radius;
+                    
+                    ctx.fillStyle = '#1a1918'; // plane dot
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // subtle glow
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = 'rgba(26,25,24,0.5)';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+        
+        // Simple Interaction logic
+        document.querySelectorAll('.flight-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelector('.flight-card.active').classList.remove('active');
+                card.classList.add('active');
+                // Could fly camera to coordinates here based on data attribute
+            });
+        });
+    </script>
+</body>
+</html>

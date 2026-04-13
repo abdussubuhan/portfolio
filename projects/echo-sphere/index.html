@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Sphere</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .overlay {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            pointer-events: none;
+            color: #fff;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: #888;
+            letter-spacing: 2px;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="sphere-canvas"></canvas>
+
+    <div class="overlay">
+        <div class="title">Echo Sphere</div>
+        <div class="subtitle">Interactive Generative Node Matrix</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('sphere-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        const numParticles = 300;
+        const sphereRadius = 250;
+        
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        let currentRotationX = 0;
+        let currentRotationY = 0;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            mouseX = width / 2;
+            mouseY = height / 2;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Map mouse position to rotation targets (-PI to PI roughly)
+            targetRotationY = ((mouseX / width) - 0.5) * Math.PI * 2;
+            targetRotationX = ((mouseY / height) - 0.5) * Math.PI * 2;
+        });
+
+        class Particle {
+            constructor() {
+                // Initialize spherical coordinates using Fibonacci sphere algorithm for even distribution
+                this.theta = 0;
+                this.phi = 0;
+                this.x = 0;
+                this.y = 0;
+                this.z = 0;
+                this.baseSize = Math.random() * 1.5 + 0.5;
+            }
+            
+            project(rotX, rotY) {
+                // Rotate around X
+                let y1 = this.y * Math.cos(rotX) - this.z * Math.sin(rotX);
+                let z1 = this.y * Math.sin(rotX) + this.z * Math.cos(rotX);
+                
+                // Rotate around Y
+                let x2 = this.x * Math.cos(rotY) + z1 * Math.sin(rotY);
+                let z2 = -this.x * Math.sin(rotY) + z1 * Math.cos(rotY);
+                
+                let y2 = y1;
+
+                // Perspective projection
+                const fov = 400;
+                const scale = fov / (fov + z2 + sphereRadius * 2);
+                
+                const projX = (x2 * scale) + width / 2;
+                const projY = (y2 * scale) + height / 2;
+
+                return { x: projX, y: projY, z: z2, scale: scale };
+            }
+        }
+
+        // Initialize particles
+        for(let i = 0; i < numParticles; i++) {
+            let p = new Particle();
+            
+            // Fibonacci sphere distribution
+            let phi = Math.acos(1 - 2 * (i + 0.5) / numParticles);
+            let theta = Math.PI * (1 + Math.sqrt(5)) * (i + 0.5);
+            
+            p.x = sphereRadius * Math.sin(phi) * Math.cos(theta);
+            p.y = sphereRadius * Math.cos(phi);
+            p.z = sphereRadius * Math.sin(phi) * Math.sin(theta);
+            
+            particles.push(p);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Smooth rotation easing
+            currentRotationX += (targetRotationX - currentRotationX) * 0.05;
+            currentRotationY += (targetRotationY - currentRotationY) * 0.05;
+            
+            // Auto rotation if mouse is still
+            currentRotationY += 0.005;
+
+            let projectedNodes = [];
+
+            for(let i = 0; i < particles.length; i++) {
+                let proj = particles[i].project(currentRotationX, currentRotationY);
+                projectedNodes.push({
+                    p: particles[i],
+                    proj: proj,
+                    index: i
+                });
+            }
+
+            // Depth sort (Z-indexing)
+            projectedNodes.sort((a, b) => b.proj.z - a.proj.z);
+
+            // Draw Lines
+            ctx.lineWidth = 0.5;
+            for(let i = 0; i < projectedNodes.length; i++) {
+                let n1 = projectedNodes[i];
+                
+                // Only connect to a few close neighbors to save performance and look good
+                for(let j = i + 1; j < projectedNodes.length; j++) {
+                    let n2 = projectedNodes[j];
+                    
+                    let dx = n1.p.x - n2.p.x;
+                    let dy = n1.p.y - n2.p.y;
+                    let dz = n1.p.z - n2.p.z;
+                    
+                    let distSq = dx*dx + dy*dy + dz*dz;
+                    
+                    if(distSq < 4000) { // Connection threshold
+                        // Calculate opacity based on distance and Z-depth
+                        let avgZ = (n1.proj.z + n2.proj.z) / 2;
+                        let alpha = Math.max(0, 1 - (avgZ + sphereRadius) / (sphereRadius * 2));
+                        alpha *= (1 - distSq / 4000) * 0.5; // Fade out long lines
+                        
+                        ctx.strokeStyle = `rgba(200, 200, 200, ${alpha})`;
+                        ctx.beginPath();
+                        ctx.moveTo(n1.proj.x, n1.proj.y);
+                        ctx.lineTo(n2.proj.x, n2.proj.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Draw Nodes
+            for(let i = 0; i < projectedNodes.length; i++) {
+                let node = projectedNodes[i];
+                let alpha = Math.max(0.1, 1 - (node.proj.z + sphereRadius) / (sphereRadius * 2));
+                
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(node.proj.x, node.proj.y, node.p.baseSize * node.proj.scale * 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
+</body>
+</html>

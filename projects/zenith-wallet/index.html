@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith Wallet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d0d0c;
+            color: #f8f7f4;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        /* Ambient Glow Background */
+        .ambient-glow {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(168,162,158,0.15) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            z-index: 1;
+        }
+
+        /* Left Column: Card & Balance */
+        .wallet-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .balance-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: -0.05em;
+        }
+
+        .balance-trend {
+            color: #4ade80;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 3D Glassmorphism Credit Card */
+        .card-container {
+            perspective: 1000px;
+            width: 100%;
+            aspect-ratio: 1.586;
+        }
+
+        .credit-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-glare {
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.3) 25%, transparent 30%);
+            z-index: 2;
+            pointer-events: none;
+            transition: transform 0.1s;
+        }
+
+        .card-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+        }
+
+        .card-chip {
+            width: 40px;
+            height: 30px;
+            background: linear-gradient(135deg, #d4d0cb, #a8a29e);
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+        .card-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 0.15em;
+            margin-top: auto;
+            margin-bottom: 1rem;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Right Column: Chart & Transactions */
+        .data-panel {
+            background: #1a1918;
+            border-radius: 24px;
+            border: 1px solid rgba(168,162,158,0.2);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .chart-wrapper {
+            height: 250px;
+            width: 100%;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #d4d0cb;
+            margin-bottom: 1rem;
+        }
+
+        .transactions {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        .tx-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .tx-item:hover {
+            background: rgba(255,255,255,0.05);
+            transform: translateX(5px);
+        }
+
+        .tx-left { display: flex; align-items: center; gap: 1rem; }
+        
+        .tx-icon {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(168,162,158,0.1);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .tx-details p { font-size: 0.95rem; font-weight: 500; }
+        .tx-details span { font-size: 0.75rem; color: #8a8580; }
+        
+        .tx-amount { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; }
+        .tx-amount.positive { color: #f8f7f4; }
+        .tx-amount.negative { color: #a8a29e; }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+
+    <div class="dashboard">
+        <!-- Left Panel -->
+        <div class="wallet-panel">
+            <div class="balance-header">
+                <h1>Zenith</h1>
+                <div class="balance-amount">$124,590.00</div>
+                <div class="balance-trend">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    +8.4% this week
+                </div>
+            </div>
+
+            <div class="card-container" id="card-container">
+                <div class="credit-card" id="card">
+                    <div class="card-glare" id="glare"></div>
+                    <div class="card-logo">ZENITH</div>
+                    <div class="card-chip"></div>
+                    <div class="card-number">•••• •••• •••• 4289</div>
+                    <div class="card-bottom">
+                        <span>John Doe</span>
+                        <span>12/28</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display:flex; gap:1rem; margin-top:1rem;">
+                <button style="flex:1; padding:1rem; border-radius:12px; background:#f8f7f4; color:#0d0d0c; border:none; font-weight:600; cursor:pointer;">Send</button>
+                <button style="flex:1; padding:1rem; border-radius:12px; background:#1a1918; color:#f8f7f4; border:1px solid #3a3835; font-weight:600; cursor:pointer;">Receive</button>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="data-panel">
+            <div>
+                <h2>Portfolio Performance</h2>
+                <div class="chart-wrapper">
+                    <canvas id="walletChart"></canvas>
+                </div>
+            </div>
+
+            <div>
+                <h2 style="margin-top: 1rem;">Recent Activity</h2>
+                <div class="transactions">
+                    <div class="tx-item">
+                        <div class="tx-left">
+                            <div class="tx-icon">↓</div>
+                            <div class="tx-details">
+                                <p>Received from Stellar Exchange</p>
+                                <span>Today, 10:45 AM</span>
+                            </div>
+                        </div>
+                        <div class="tx-amount positive">+$4,250.00</div>
+                    </div>
+                    <div class="tx-item">
+                        <div class="tx-left">
+                            <div class="tx-icon">↑</div>
+                            <div class="tx-details">
+                                <p>Lumina Studio Subscription</p>
+                                <span>Yesterday, 14:20 PM</span>
+                            </div>
+                        </div>
+                        <div class="tx-amount negative">-$49.00</div>
+                    </div>
+                    <div class="tx-item">
+                        <div class="tx-left">
+                            <div class="tx-icon">↑</div>
+                            <div class="tx-details">
+                                <p>Sent to Alex Design</p>
+                                <span>Oct 12, 09:15 AM</span>
+                            </div>
+                        </div>
+                        <div class="tx-amount negative">-$1,200.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 3D Card Hover Effect
+        const cardContainer = document.getElementById('card-container');
+        const card = document.getElementById('card');
+        const glare = document.getElementById('glare');
+
+        cardContainer.addEventListener('mousemove', (e) => {
+            const rect = cardContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = ((y - centerY) / centerY) * -15;
+            const rotateY = ((x - centerX) / centerX) * 15;
+
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            
+            // Glare logic
+            const glareX = (x / rect.width) * 100;
+            const glareY = (y / rect.height) * 100;
+            glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.4) 0%, transparent 40%)`;
+        });
+
+        cardContainer.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+            glare.style.background = `linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.1) 25%, transparent 30%)`;
+        });
+
+        // Chart.js initialization
+        Chart.defaults.color = '#8a8580';
+        Chart.defaults.font.family = 'Inter';
+        
+        const ctx = document.getElementById('walletChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, 'rgba(248, 247, 244, 0.2)');
+        gradient.addColorStop(1, 'rgba(248, 247, 244, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1w', '2w', '3w', '4w', '5w', '6w', 'Now'],
+                datasets: [{
+                    data: [98000, 102000, 99500, 108000, 115000, 112000, 124590],
+                    borderColor: '#f8f7f4',
+                    borderWidth: 2,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#f8f7f4'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, border: { display:false } },
+                    y: { display: false }
+                },
+                interaction: { mode: 'index', intersect: false }
+            }
+        });
+    </script>
+</body>
+</html>

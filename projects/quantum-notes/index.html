@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Notes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #f8f7f4;
+            color: #1a1918;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #e8e4df;
+            border-right: 1px solid #d4d0cb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #d4d0cb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .add-note {
+            background: transparent;
+            border: 1px solid #8a8580;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #1a1918;
+            transition: all 0.2s;
+        }
+
+        .add-note:hover {
+            background: #1a1918;
+            color: #f8f7f4;
+            border-color: #1a1918;
+        }
+
+        .note-list {
+            flex: 1;
+            overflow-y: auto;
+            list-style: none;
+        }
+
+        .note-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #d4d0cb;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .note-item:hover, .note-item.active {
+            background: #f8f7f4;
+        }
+
+        .note-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-preview {
+            font-size: 0.75rem;
+            color: #8a8580;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Main Editor */
+        .workspace {
+            flex: 1;
+            display: flex;
+        }
+
+        .editor {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px dashed #d4d0cb;
+        }
+
+        .editor input {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1918;
+            border: none;
+            background: transparent;
+            outline: none;
+            margin-bottom: 1rem;
+        }
+
+        .editor textarea {
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: #3a3835;
+            line-height: 1.7;
+            border: none;
+            background: transparent;
+            outline: none;
+            resize: none;
+        }
+
+        /* Live Render */
+        .renderer {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #ffffff;
+        }
+
+        .renderer h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 1rem; }
+        .renderer h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 1.5rem 0 0.5rem; }
+        .renderer p { margin-bottom: 1rem; line-height: 1.7; color: #1a1918; }
+        .renderer strong { font-weight: 600; }
+        .renderer em { font-style: italic; }
+        .renderer ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+        .renderer li { margin-bottom: 0.3rem; }
+        .renderer blockquote {
+            border-left: 3px solid #8a8580;
+            padding-left: 1rem;
+            color: #8a8580;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+        .renderer code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #e8e4df;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>Quantum</h1>
+            <button class="add-note" title="New Note">+</button>
+        </div>
+        <ul class="note-list">
+            <li class="note-item active">
+                <div class="note-title">Project Architecture</div>
+                <div class="note-preview">Thoughts on the new design system...</div>
+            </li>
+            <li class="note-item">
+                <div class="note-title">Meeting Details</div>
+                <div class="note-preview">Discuss timeline and deliverables.</div>
+            </li>
+            <li class="note-item">
+                <div class="note-title">Snippets Cache</div>
+                <div class="note-preview">Useful JS array methods to remember.</div>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="workspace">
+        <div class="editor">
+            <input type="text" value="Project Architecture" placeholder="Note Title...">
+            <textarea placeholder="Start typing in markdown..."># Project Architecture
+
+Thoughts on the new design system for Q4.
+
+## Core Principles
+
+We need to prioritize **Simplicity** and **Elegance**.
+- Reduce clutter
+- Maximize whitespace
+- Use typographic hierarchy instead of strict borders.
+
+> "Design is the silent ambassador of your brand."
+
+Code example for the button:
+`const btn = document.querySelector('.btn');`
+</textarea>
+        </div>
+        <div class="renderer markdown-body" id="preview">
+            <!-- Populated via marked.js -->
+        </div>
+    </main>
+
+    <script>
+        const textarea = document.querySelector('.editor textarea');
+        const titleInput = document.querySelector('.editor input');
+        const preview = document.getElementById('preview');
+
+        function updatePreview() {
+            // Combine title and body for the preview
+            const markdown = `# ${titleInput.value}\n\n${textarea.value}`;
+            preview.innerHTML = marked.parse(markdown);
+        }
+
+        textarea.addEventListener('input', updatePreview);
+        titleInput.addEventListener('input', updatePreview);
+
+        // Initial render
+        updatePreview();
+
+        // Simple animation for interacting with list
+        document.querySelectorAll('.note-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelector('.note-item.active').classList.remove('active');
+                item.classList.add('active');
+                
+                // Animate editor
+                const editorArea = document.querySelector('.editor');
+                editorArea.style.opacity = '0';
+                editorArea.style.transform = 'translateY(10px)';
+                
+                setTimeout(() => {
+                    titleInput.value = item.querySelector('.note-title').textContent;
+                    textarea.value = "Content for: " + item.querySelector('.note-title').textContent;
+                    updatePreview();
+                    
+                    editorArea.style.transition = 'all 0.3s';
+                    editorArea.style.opacity = '1';
+                    editorArea.style.transform = 'translateY(0)';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>

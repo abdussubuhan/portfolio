@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crystal Music Visualizer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #0d0d0c;
+            color: #f8f7f4;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1918 0%, #0d0d0c 100%);
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(13, 13, 12, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(168,162,158,0.2);
+            z-index: 10;
+        }
+
+        .track-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .cover-art {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d4d0cb, #8a8580);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        
+        .cover-art svg {
+            width: 30px;
+            height: 30px;
+            fill: #0d0d0c;
+        }
+
+        .track-details h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .track-details p {
+            font-size: 0.8rem;
+            color: #a8a29e;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .play-btn {
+            background: #f8f7f4;
+            color: #0d0d0c;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(248, 247, 244, 0.4);
+        }
+
+        .play-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            margin-left: 2px;
+        }
+        
+        .play-toggle.playing svg path {
+            display: none;
+        }
+        
+        .play-toggle.playing::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: currentColor;
+            margin-right: 4px;
+        }
+        
+        .play-toggle.playing::after {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: currentColor;
+        }
+
+        .interactions {
+            font-size: 0.8rem;
+            color: #8a8580;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        
+        .start-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 13, 12, 0.9);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: opacity 0.5s;
+        }
+        
+        .start-overlay h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .start-btn {
+            padding: 1rem 3rem;
+            background: transparent;
+            color: #f8f7f4;
+            border: 1px solid #a8a29e;
+            border-radius: 40px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .start-btn:hover {
+            background: #f8f7f4;
+            color: #0d0d0c;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="start-overlay" id="overlay">
+        <h1>Crystal Visualizer</h1>
+        <button class="start-btn" id="startBtn">Initialize Audio</button>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="visualizer"></canvas>
+    </div>
+
+    <div class="controls">
+        <div class="track-info">
+            <div class="cover-art">
+                <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            </div>
+            <div class="track-details">
+                <h2>Generated Ambient</h2>
+                <p>Web Audio API Synthesis</p>
+            </div>
+        </div>
+
+        <button class="play-btn play-toggle" id="playBtn">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+
+        <div class="interactions">
+            Click &amp; Drag to Rotate
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        const overlay = document.getElementById('overlay');
+        const startBtn = document.getElementById('startBtn');
+        const playBtn = document.getElementById('playBtn');
+
+        let audioCtx, analyser, dataArray, bufferLength;
+        let isPlaying = false;
+        let isInitialized = false;
+        
+        // Simulating an oscillator for demo purposes since we don't have an audio file
+        let oscillators = [];
+        let gainNode;
+
+        // Resize
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight - 100; // minus controls height
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // 3D parameters
+        let rotationX = 0;
+        let rotationY = 0;
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        let isDragging = false;
+        let lastX, lastY;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - lastX;
+                const deltaY = e.clientY - lastY;
+                targetRotationY += deltaX * 0.01;
+                targetRotationX += deltaY * 0.01;
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            
+            // Setup synth
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.5;
+            gainNode.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            
+            analyser.fftSize = 256;
+            bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+            
+            isInitialized = true;
+        }
+
+        function playSynth() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            // Create a pleasant chord
+            const freqs = [220, 277.18, 329.63, 440]; // A major 7
+            
+            oscillators = freqs.map(freq => {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                
+                // Add some subtle LFO for visual variance
+                const lfo = audioCtx.createOscillator();
+                lfo.frequency.value = Math.random() * 2;
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.value = 10;
+                lfo.connect(lfoGain);
+                lfoGain.connect(osc.detune);
+                lfo.start();
+                
+                osc.connect(gainNode);
+                osc.start();
+                return osc;
+            });
+            
+            isPlaying = true;
+            playBtn.classList.add('playing');
+        }
+
+        function stopSynth() {
+            oscillators.forEach(osc => {
+                osc.stop();
+                osc.disconnect();
+            });
+            oscillators = [];
+            isPlaying = false;
+            playBtn.classList.remove('playing');
+        }
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            playSynth();
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 500);
+        });
+
+        playBtn.addEventListener('click', () => {
+            if (!isInitialized) return;
+            if (isPlaying) {
+                stopSynth();
+            } else {
+                playSynth();
+            }
+        });
+
+        // Drawing loops
+        function draw() {
+            requestAnimationFrame(draw);
+            
+            ctx.fillStyle = 'rgba(13, 13, 12, 0.2)'; // trailing effect
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Smooth rotations
+            rotationX += (targetRotationX - rotationX) * 0.1;
+            rotationY += (targetRotationY - rotationY) * 0.1;
+            // Auto rotate slowly
+            if(!isDragging) targetRotationY += 0.002;
+
+            if (isInitialized && isPlaying) {
+                analyser.getByteFrequencyData(dataArray);
+            } else if (isInitialized) {
+                // Decay
+                for(let i=0; i<dataArray.length; i++) {
+                    dataArray[i] = Math.max(0, dataArray[i] - 5);
+                }
+            } else {
+                // Fake data for preview before start
+                if (!dataArray) dataArray = new Uint8Array(128).fill(20);
+                for(let i=0; i<dataArray.length; i++) {
+                    dataArray[i] = 20 + Math.sin(Date.now()*0.001 + i) * 10;
+                }
+            }
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 100;
+
+            // Draw circular visualizer
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            
+            // Fake 3D projection
+            const cosY = Math.cos(rotationY);
+            const sinY = Math.sin(rotationY);
+            const cosX = Math.cos(rotationX);
+            const sinX = Math.sin(rotationX);
+
+            for (let i = 0; i < bufferLength; i++) {
+                const value = dataArray[i];
+                const normalizedVal = value / 255;
+                
+                const angle = (i / bufferLength) * Math.PI * 2;
+                
+                // Base 2D position
+                let x = Math.cos(angle) * radius;
+                let y = Math.sin(angle) * radius;
+                let z = (normalizedVal * 150) - 50; // Amplitude becomes Z axis
+                
+                // Apply rotation
+                // Rotate Y
+                let tempX = x * cosY - z * sinY;
+                let tempZ = x * sinY + z * cosY;
+                x = tempX;
+                z = tempZ;
+                
+                // Rotate X
+                let tempY = y * cosX - z * sinX;
+                z = y * sinX + z * cosX;
+                y = tempY;
+
+                // Perspective projection
+                const perspective = 400 / (400 - z);
+                const screenX = x * perspective;
+                const screenY = y * perspective;
+                
+                // Draw nodes and lines
+                const size = Math.max(1.5, normalizedVal * 4 * perspective);
+                
+                // Colors based on amplitude
+                const r = 248 - Math.floor(normalizedVal * 50);
+                const g = 247 - Math.floor(normalizedVal * 50);
+                const b = 244 + Math.floor(normalizedVal * 11);
+                const alpha = Math.min(1, 0.2 + normalizedVal);
+                
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw connecting lines from center
+                ctx.strokeStyle = `rgba(168, 162, 158, ${alpha * 0.3})`;
+                ctx.lineWidth = 0.5 * perspective;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(screenX, screenY);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+        
+        draw();
+    </script>
+</body>
+</html>

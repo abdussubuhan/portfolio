@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Vault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #030303;
+            --accent-silver: #c0c0c0;
+            --metallic-light: #f5f5f5;
+            --metallic-dark: #2a2a2a;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --grid-color: rgba(255, 255, 255, 0.04);
+            --font-main: 'Outfit', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--metallic-light);
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .ambient-light {
+            position: absolute;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, rgba(192,192,192,0.1) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .vault-container {
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            backdrop-filter: blur(16px);
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .vault-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vault-title {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-silver);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-silver);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; box-shadow: 0 0 5px var(--accent-silver); }
+            50% { opacity: 1; box-shadow: 0 0 15px var(--accent-silver); }
+            100% { opacity: 0.5; box-shadow: 0 0 5px var(--accent-silver); }
+        }
+
+        .vault-body {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .secure-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .secure-card:hover {
+            border-color: rgba(192,192,192,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .card-label {
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .secret-data {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            color: var(--accent-silver);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .decrypt-btn {
+            position: absolute;
+            right: 1.5rem;
+            bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--metallic-dark), #111);
+            border: 1px solid var(--glass-border);
+            color: var(--metallic-light);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: var(--font-main);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .decrypt-btn:hover {
+            background: var(--metallic-light);
+            color: #000;
+        }
+
+        /* Scramble text effect class */
+        .scramble {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-light"></div>
+    <div class="vault-container">
+        <header class="vault-header">
+            <div class="vault-title">
+                <div class="status-dot"></div>
+                NOVA VAULT
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: #888;">SYS_ENCRYPTED_256</div>
+        </header>
+
+        <main class="vault-body">
+            <div class="secure-card">
+                <div class="card-header">
+                    <span class="card-label">Main Gateway Key</span>
+                    <span>🔒</span>
+                </div>
+                <div class="secret-data" data-value="AX-992-BQC-01P">****************</div>
+                <button class="decrypt-btn">Decrypt</button>
+            </div>
+
+            <div class="secure-card">
+                <div class="card-header">
+                    <span class="card-label">Bypass Sequence</span>
+                    <span>🔒</span>
+                </div>
+                <div class="secret-data" data-value="ALPHA-TANGO-ZERO">****************</div>
+                <button class="decrypt-btn">Decrypt</button>
+            </div>
+
+            <div class="secure-card">
+                <div class="card-header">
+                    <span class="card-label">Core Database Hash</span>
+                    <span>🔒</span>
+                </div>
+                <div class="secret-data" data-value="1a2b3c4d5e6f7g8h">****************</div>
+                <button class="decrypt-btn">Decrypt</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Entrance animation
+        gsap.from(".vault-container", {
+            duration: 1.2,
+            y: 50,
+            opacity: 0,
+            ease: "power3.out"
+        });
+
+        gsap.from(".secure-card", {
+            duration: 0.8,
+            y: 30,
+            opacity: 0,
+            stagger: 0.2,
+            delay: 0.5,
+            ease: "back.out(1.7)"
+        });
+
+        // Decrypt text effect
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$*%";
+        
+        document.querySelectorAll('.decrypt-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const card = e.target.closest('.secure-card');
+                const targetTextElement = card.querySelector('.secret-data');
+                const btnText = e.target;
+                
+                if (btnText.innerText === "DECRYPT") {
+                    btnText.innerText = "ENCRYPTING...";
+                    const realValue = targetTextElement.getAttribute('data-value');
+                    let cycles = 0;
+                    const maxCycles = 15;
+                    
+                    const interval = setInterval(() => {
+                        targetTextElement.innerText = realValue.split('').map((char, index) => {
+                            if (index < cycles) return char;
+                            return chars[Math.floor(Math.random() * chars.length)];
+                        }).join('');
+                        
+                        cycles += 0.5; // Controls speed of reveal
+                        
+                        if (cycles >= realValue.length) {
+                            clearInterval(interval);
+                            targetTextElement.innerText = realValue;
+                            btnText.innerText = "LOCK";
+                            card.querySelector('.card-header span:last-child').innerText = '🔓';
+                        }
+                    }, 50);
+                } else {
+                    targetTextElement.innerText = "****************";
+                    btnText.innerText = "DECRYPT";
+                    card.querySelector('.card-header span:last-child').innerText = '🔒';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

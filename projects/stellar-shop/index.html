@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar E-Commerce</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #1a1918;
+            overflow-x: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links li {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cart-icon {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -12px;
+            background: #1a1918;
+            color: white;
+            font-size: 0.6rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .cart-count.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .product-display {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .product-circle {
+            position: absolute;
+            width: 60vh;
+            height: 60vh;
+            border-radius: 50%;
+            background: radial-gradient(circle at top left, #ffffff, #e8e4df);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,1);
+            z-index: 1;
+        }
+
+        /* Mock a 3D model with an interactive rotating cube using CSS */
+        .scene {
+            width: 300px;
+            height: 300px;
+            perspective: 1000px;
+            z-index: 2;
+            cursor: grab;
+        }
+
+        .scene:active { cursor: grabbing; }
+
+        .object {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s;
+            transform: rotateX(-15deg) rotateY(30deg);
+        }
+
+        .face {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, rgba(212,208,203,0.9), rgba(168,162,158,0.9));
+            border: 1px solid rgba(255,255,255,0.4);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 50px rgba(255,255,255,0.5);
+        }
+        
+        .face::after {
+            content: 'STELLAR';
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: rgba(26,25,24,0.1);
+            letter-spacing: 0.2em;
+        }
+
+        .face-front  { transform: rotateY(0deg) translateZ(150px); }
+        .face-back   { transform: rotateY(180deg) translateZ(150px); }
+        .face-right  { transform: rotateY(90deg) translateZ(150px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(150px); }
+        .face-top    { transform: rotateX(90deg) translateZ(150px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(150px); }
+
+        .product-info {
+            width: 400px;
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+            box-shadow: -20px 0 60px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+
+        .category {
+            font-size: 0.75rem;
+            color: #8a8580;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 600;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #3a3835;
+            margin-bottom: 2rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .description {
+            font-size: 0.95rem;
+            color: #8a8580;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+        }
+
+        .add-to-cart {
+            padding: 1.2rem;
+            background: #1a1918;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-to-cart span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .add-to-cart::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+            z-index: 1;
+        }
+
+        .add-to-cart:hover::before {
+            left: 100%;
+        }
+        
+        .drag-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #8a8580;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .drag-line {
+            width: 30px;
+            height: 1px;
+            background: #a8a29e;
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="header">
+        <div class="brand">STELLAR</div>
+        <ul class="nav-links">
+            <li>Collections</li>
+            <li>Heritage</li>
+            <li>Journal</li>
+        </ul>
+        <div class="cart-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            <div class="cart-count" id="cartCount">1</div>
+        </div>
+    </header>
+
+    <div class="product-display">
+        <div class="product-circle"></div>
+        <div class="scene" id="scene">
+            <div class="object" id="object">
+                <div class="face face-front"></div>
+                <div class="face face-back"></div>
+                <div class="face face-right"></div>
+                <div class="face face-left"></div>
+                <div class="face face-top"></div>
+                <div class="face face-bottom"></div>
+            </div>
+        </div>
+        <div class="drag-hint">
+            <div class="drag-line"></div>
+            Drag to Rotate
+            <div class="drag-line"></div>
+        </div>
+    </div>
+
+    <div class="product-info">
+        <div class="category">Automatique</div>
+        <h1>Silver Series<br>No. 01</h1>
+        <div class="price">$4,250.00</div>
+        <p class="description">Crafted from brushed aerospace-grade titanium and pure platinum. A minimalist testament to precise engineering and timeless design, encased in sapphire crystal.</p>
+        <button class="add-to-cart" id="addToCartBtn">
+            <span>Add to Cart</span>
+        </button>
+    </div>
+
+    <script>
+        // Interactive 3D Rotation
+        const scene = document.getElementById('scene');
+        const object = document.getElementById('object');
+        
+        let isDragging = false;
+        let previousX = 0;
+        let previousY = 0;
+        let rotationX = -15;
+        let rotationY = 30;
+
+        scene.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousX = e.clientX;
+            previousY = e.clientY;
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const deltaX = e.clientX - previousX;
+            const deltaY = e.clientY - previousY;
+            
+            rotationY += deltaX * 0.5;
+            rotationX -= deltaY * 0.5;
+            
+            // Constrain X rotation to avoid flipping upside down entirely if preferred
+            if(rotationX > 90) rotationX = 90;
+            if(rotationX < -90) rotationX = -90;
+
+            object.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            
+            previousX = e.clientX;
+            previousY = e.clientY;
+        });
+
+        // Auto-rotate slowly when not dragging
+        setInterval(() => {
+            if(!isDragging) {
+                rotationY += 0.2;
+                object.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+            }
+        }, 30);
+
+        // Add to Cart Animation
+        const btn = document.getElementById('addToCartBtn');
+        const count = document.getElementById('cartCount');
+        let currentCount = 0;
+
+        btn.addEventListener('click', () => {
+            btn.querySelector('span').textContent = 'Adding...';
+            
+            setTimeout(() => {
+                currentCount++;
+                count.textContent = currentCount;
+                count.classList.add('active');
+                
+                // bump animation
+                count.style.transform = 'scale(1.3)';
+                setTimeout(() => count.style.transform = 'scale(1)', 200);
+
+                btn.querySelector('span').textContent = 'Added to Cart';
+                btn.style.background = '#8a8580';
+                
+                setTimeout(() => {
+                    btn.querySelector('span').textContent = 'Add to Cart';
+                    btn.style.background = '#1a1918';
+                }, 2000);
+            }, 600);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Metrics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --accent-silver: #d4d4d4;
+            --text-main: #ffffff;
+            --text-dim: #888888;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --ring-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: radial-gradient(circle at 50% 0%, rgba(200,200,200,0.05) 0%, transparent 70%);
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Ring Chart Container */
+        .rings-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        svg.ring-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+
+        circle {
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .ring-track {
+            stroke: var(--ring-bg);
+        }
+
+        .ring-progress {
+            stroke: var(--accent-silver);
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .center-stats {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .main-stat {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        /* Side Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, var(--accent-silver), transparent);
+            opacity: 0.5;
+        }
+
+        .box-value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .box-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <!-- Main Activity Rings -->
+        <div class="card ring-card">
+            <div class="card-header">
+                <span>Daily Activity</span>
+                <span>•••</span>
+            </div>
+            
+            <div class="rings-container">
+                <svg class="ring-svg" viewBox="0 0 200 200">
+                    <!-- Outer Ring (Move) -->
+                    <circle class="ring-track" cx="100" cy="100" r="80" stroke-width="12"></circle>
+                    <circle class="ring-progress" cx="100" cy="100" r="80" stroke-width="12" stroke="url(#silverGradient)" data-target="250"></circle>
+                    
+                    <!-- Middle Ring (Exercise) -->
+                    <circle class="ring-track" cx="100" cy="100" r="60" stroke-width="12"></circle>
+                    <circle class="ring-progress" cx="100" cy="100" r="60" stroke-width="12" stroke="#ffffff" data-target="300"></circle>
+                    
+                    <!-- Inner Ring (Stand) -->
+                    <circle class="ring-track" cx="100" cy="100" r="40" stroke-width="12"></circle>
+                    <circle class="ring-progress" cx="100" cy="100" r="40" stroke-width="12" stroke="#888888" data-target="150"></circle>
+
+                    <defs>
+                        <linearGradient id="silverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="100%" stop-color="#777777"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                
+                <div class="center-stats">
+                    <span class="main-stat count-up" data-val="845">0</span>
+                    <span class="stat-label">KCAL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="box-label">Heart Rate</span>
+                <span class="box-value count-up" data-val="72">0</span>
+                <span class="stat-label">BPM</span>
+            </div>
+            <div class="stat-box">
+                <span class="box-label">Steps</span>
+                <span class="box-value count-up" data-val="10245">0</span>
+                <span class="stat-label">STEPS</span>
+            </div>
+            <div class="stat-box">
+                <span class="box-label">Distance</span>
+                <span class="box-value count-up" data-val="6.8">0</span>
+                <span class="stat-label">KM</span>
+            </div>
+            <div class="stat-box">
+                <span class="box-label">Sleep</span>
+                <span class="box-value">7h 20m</span>
+                <span class="stat-label">AVG</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animate Cards In
+        gsap.from(".card", {
+            duration: 1,
+            y: 40,
+            opacity: 0,
+            ease: "power3.out"
+        });
+
+        gsap.from(".stat-box", {
+            duration: 0.8,
+            y: 20,
+            opacity: 0,
+            stagger: 0.1,
+            delay: 0.3,
+            ease: "power3.out"
+        });
+
+        // Animate Rings
+        setTimeout(() => {
+            const rings = document.querySelectorAll('.ring-progress');
+            rings.forEach(ring => {
+                const radius = ring.r.baseVal.value;
+                const circumference = 2 * Math.PI * radius;
+                ring.style.strokeDasharray = circumference;
+                
+                // Target value is an offset calculation
+                const targetVal = parseFloat(ring.getAttribute('data-target'));
+                // Just map 500 to full circle for demo purposes
+                const percent = Math.min(targetVal / 500, 1); 
+                const offset = circumference - (percent * circumference);
+                
+                // Reset initial
+                ring.style.strokeDashoffset = circumference;
+                
+                // Trigger animation
+                setTimeout(() => {
+                    ring.style.transition = 'stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1)';
+                    ring.style.strokeDashoffset = offset;
+                }, 500);
+            });
+        }, 100);
+
+        // Count up animation for numbers
+        const countUps = document.querySelectorAll('.count-up');
+        countUps.forEach(counter => {
+            const target = parseFloat(counter.getAttribute('data-val'));
+            
+            gsap.to(counter, {
+                duration: 2,
+                innerText: target,
+                snap: { innerText: target % 1 !== 0 ? 0.1 : 1 }, // keep decimals if needed
+                delay: 0.5,
+                ease: "power2.out",
+                onUpdate: function() {
+                    // Force re-render of text for decimal stats
+                    if(target % 1 !== 0) {
+                        counter.innerText = parseFloat(counter.innerText).toFixed(1);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

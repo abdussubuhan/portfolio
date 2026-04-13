@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prism Gallery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #f8f7f4;
+            color: #1a1918;
+            font-family: 'Inter', sans-serif;
+            padding: 4rem 2rem;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1a1918;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .filters li {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #a8a29e;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .filters li:hover, .filters li.active {
+            color: #1a1918;
+            border-bottom-color: #1a1918;
+        }
+
+        /* Masonry Grid Simulation */
+        .gallery {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            grid-auto-rows: 10px; /* Helper for masonry via js */
+        }
+
+        .item {
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #e8e4df;
+            perspective: 1000px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .item-inner {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+        }
+
+        .item:hover .item-inner {
+            transform: translateZ(20px) scale(1.02);
+        }
+
+        .img-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Simulate placeholder images with gradients */
+        .img-container.arch { background: linear-gradient(45deg, #d4d0cb, #f0ede8); }
+        .img-container.nature { background: linear-gradient(135deg, #a8a29e, #d4d0cb); }
+        .img-container.portrait { background: linear-gradient(to top, #e8e4df, #f8f7f4); }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(26,25,24,0.6), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
+        }
+
+        .item:hover .overlay {
+            opacity: 1;
+        }
+
+        .caption {
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            transform: translateY(15px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
+        }
+
+        .item:hover .caption {
+            transform: translateY(0);
+        }
+        
+        .border-box {
+            position: absolute;
+            inset: 15px;
+            border: 1px solid rgba(255,255,255,0);
+            transition: border-color 0.4s;
+            pointer-events: none;
+        }
+        
+        .item:hover .border-box {
+            border-color: rgba(255,255,255,0.4);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <h1>Prism Editorial</h1>
+        <ul class="filters">
+            <li class="active">All</li>
+            <li>Architecture</li>
+            <li>Nature</li>
+            <li>Portrait</li>
+        </ul>
+    </header>
+
+    <div class="gallery" id="gallery">
+        <!-- JS will populate -->
+    </div>
+
+    <script>
+        const gallery = document.getElementById('gallery');
+        const categories = ['arch', 'nature', 'portrait'];
+        const titles = [
+            'Brutalist Concrete', 'Urban Sprawl', 'Glass Facade', 
+            'Morning Mist', 'Alpine Peak', 'Ocean Swell',
+            'Studio Light', 'Candid Moment', 'Shadow Play'
+        ];
+
+        // Generate mock items
+        for (let i = 0; i < 15; i++) {
+            const cat = categories[Math.floor(Math.random() * categories.length)];
+            const title = titles[Math.floor(Math.random() * titles.length)];
+            
+            // Randomize height for masonry effect (between 250px and 500px)
+            const height = Math.floor(Math.random() * 250) + 250;
+            // span is used to calculate grid-row-end
+            const span = Math.ceil(height / 10);
+            
+            const el = document.createElement('div');
+            el.className = 'item';
+            el.style.gridRowEnd = `span ${span}`;
+            
+            el.innerHTML = `
+                <div class="item-inner">
+                    <div class="img-container ${cat}">
+                        <div class="overlay">
+                            <h3 class="caption">${title}</h3>
+                        </div>
+                        <div class="border-box"></div>
+                    </div>
+                </div>
+            `;
+            gallery.appendChild(el);
+        }
+
+        // Intersection Observer for fade in
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    // Stagger effect
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '50px'
+        });
+
+        // Small delay to ensure CSS applies before adding class
+        setTimeout(() => {
+            document.querySelectorAll('.item').forEach(el => observer.observe(el));
+        }, 100);
+        
+        // 3D Mouse Movement effect (Parallax tilt)
+        document.querySelectorAll('.item').forEach(item => {
+            item.addEventListener('mousemove', (e) => {
+                const rect = item.getBoundingClientRect();
+                const x = e.clientX - rect.left; // x position within the element.
+                const y = e.clientY - rect.top;  // y position within the element.
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; // max 10 deg
+                const rotateY = ((x - centerX) / centerX) * 10;
+                
+                const inner = item.querySelector('.item-inner');
+                inner.style.transform = `translateZ(20px) scale(1.02) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                const inner = item.querySelector('.item-inner');
+                // Reset transform
+                inner.style.transform = '';
+            });
+        });
+    </script>
+</body>
+</html>

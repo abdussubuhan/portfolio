@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronos Timeline</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0c0c0c;
+            --line-color: rgba(255, 255, 255, 0.1);
+            --dot-color: #ffffff;
+            --accent-silver: #a0a0a0;
+            --text-main: #f5f5f5;
+            --text-dim: #777777;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .header {
+            position: absolute;
+            top: 40px;
+            left: 50px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-weight: 300;
+            font-size: 2rem;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .header p {
+            color: var(--accent-silver);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .timeline-wrapper {
+            position: relative;
+            width: 100vw;
+            padding: 0 20vw;
+            display: flex;
+            align-items: center;
+            cursor: grab;
+        }
+
+        .timeline-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 200vw;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--line-color) 10%, var(--line-color) 90%, transparent);
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .timeline-events {
+            display: flex;
+            gap: 15vw;
+            position: relative;
+            z-index: 2;
+        }
+
+        .event {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+        }
+
+        .event:nth-child(odd) {
+            justify-content: flex-end;
+            padding-bottom: 50px;
+            transform: translateY(-50%);
+        }
+
+        .event:nth-child(even) {
+            justify-content: flex-start;
+            padding-top: 50px;
+            transform: translateY(50%);
+        }
+
+        .event-dot {
+            position: absolute;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            background-color: var(--bg-color);
+            border: 2px solid var(--dot-color);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+        }
+
+        .event:nth-child(odd) .event-dot {
+            bottom: -6px;
+        }
+
+        .event:nth-child(even) .event-dot {
+            top: -6px;
+        }
+
+        .event:hover .event-dot {
+            background-color: var(--dot-color);
+            box-shadow: 0 0 20px rgba(255,255,255,0.8);
+            transform: scale(1.5);
+        }
+
+        .event-date {
+            font-size: 0.8rem;
+            color: var(--accent-silver);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .event:nth-child(even) .event-date {
+            margin-top: 10px;
+            margin-bottom: 0;
+            order: -1;
+        }
+
+        .event-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .event-desc {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-dim);
+        }
+
+        /* Abstract blurred background shapes */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(100, 100, 100, 0.1);
+            top: 20%;
+            left: 20%;
+        }
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            background: rgba(200, 200, 200, 0.05);
+            bottom: 10%;
+            right: 10%;
+        }
+
+        .progress-indicator {
+            position: fixed;
+            bottom: 40px;
+            left: 50vw;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .progress-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--line-color);
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background-color: var(--text-main);
+            transform: scale(1.5);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="header">
+        <h1>CHRONOS</h1>
+        <p>Strategic Projection</p>
+    </div>
+
+    <div class="timeline-wrapper">
+        <div class="timeline-line"></div>
+        <div class="timeline-events">
+            
+            <div class="event">
+                <div class="event-dot"></div>
+                <div class="event-date">Q1 2026</div>
+                <div class="event-title">Genesis Protocol</div>
+                <div class="event-desc">Initialization of core systems and foundational architecture build-out.</div>
+            </div>
+
+            <div class="event">
+                <div class="event-dot"></div>
+                <div class="event-date">Q2 2026</div>
+                <div class="event-title">Neural Integration</div>
+                <div class="event-desc">Connecting disparate data nodes into a unified, intelligent framework.</div>
+            </div>
+
+            <div class="event">
+                <div class="event-dot"></div>
+                <div class="event-date">Q3 2026</div>
+                <div class="event-title">Market Nexus</div>
+                <div class="event-desc">Public deployment and synchronization with external marketplace ecosystems.</div>
+            </div>
+
+            <div class="event">
+                <div class="event-dot"></div>
+                <div class="event-date">Q4 2026</div>
+                <div class="event-title">Quantum Scaling</div>
+                <div class="event-desc">Global infrastructure expansion and optimization of extreme workloads.</div>
+            </div>
+
+            <div class="event" style="padding-right: 20vw;">
+                <div class="event-dot"></div>
+                <div class="event-date">2027+</div>
+                <div class="event-title">Beyond</div>
+                <div class="event-desc">Uncharted digital territories and continued evolution.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="progress-indicator">
+        <div class="progress-dot active"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+    </div>
+
+    <script>
+        // Entrance Analytics
+        gsap.from(".event", {
+            duration: 1,
+            y: (i, target) => i % 2 === 0 ? 30 : -30,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "power3.out",
+            delay: 0.5
+        });
+
+        // Simple drag to scroll implementation
+        const wrapper = document.querySelector('.timeline-wrapper');
+        const eventsContainer = document.querySelector('.timeline-events');
+        
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        wrapper.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - wrapper.offsetLeft;
+            scrollLeft = wrapper.scrollLeft;
+        });
+
+        wrapper.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+
+        wrapper.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+
+        wrapper.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - wrapper.offsetLeft;
+            const walk = (x - startX) * 2; // Scroll speed multiplier
+            wrapper.scrollLeft = scrollLeft - walk;
+        });
+
+        // Wheel horizontal scroll
+        wrapper.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            wrapper.scrollLeft += e.deltaY * 2;
+        });
+
+    </script>
+</body>
+</html>

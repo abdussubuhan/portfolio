@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subuhan | Full-Stack Developer</title>
+    
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- Grain Texture Overlay -->
+    <div class="grain"></div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-outer"></div>
+    <div class="cursor-dot"></div>
+
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="preloader-text">
+            <span>SUBUHAN</span>
+        </div>
+        <div class="preloader-line"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <a href="#" class="nav-logo">S.</a>
+        <ul class="nav-links">
+            <li><a href="#about" class="hover-target">About</a></li>
+            <li><a href="#projects" class="hover-target">Projects</a></li>
+            <li><a href="#tech" class="hover-target">Tech Stack</a></li>
+            <li><a href="#contact" class="hover-target">Contact</a></li>
+        </ul>
+        <div class="nav-menu-btn hover-target">
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav">
+        <a href="#about" class="mobile-nav-link">About</a>
+        <a href="#projects" class="mobile-nav-link">Projects</a>
+        <a href="#tech" class="mobile-nav-link">Tech Stack</a>
+        <a href="#contact" class="mobile-nav-link">Contact</a>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <canvas id="hero-canvas" class="hero-canvas"></canvas>
+            <div class="hero-content">
+                <p class="hero-greeting">Welcome to my digital space</p>
+                <h1 class="hero-name">SUBUHAN</h1>
+                <p class="hero-title">
+                    Front-End Engineer <span>&bull;</span> Creative Developer <span>&bull;</span> Vibe Coder
+                </p>
+            </div>
+            <div class="hero-scroll-indicator">
+                <span>Scroll</span>
+                <div class="scroll-line"></div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="section about" id="about">
+            <div class="about-grid">
+                <div class="about-avatar-wrapper reveal-scale">
+                    <img src="assets/avatar.png" alt="Subuhan avatar" class="about-avatar">
+                </div>
+                <div class="about-text reveal-right">
+                    <div class="section-label">01 // Identity</div>
+                    <h2 class="section-title">Bridging Code and Aesthetics.</h2>
+                    <div class="section-divider"></div>
+                    <p>I'm Subuhan, a full-stack developer and tech enthusiast who believes that the web should be an <strong>experience</strong>, not just a document. I specialize in building visually stunning, highly interactive applications.</p>
+                    <p>Drawing inspiration from modern editorial layouts and immersive 3D web experiences, I merge solid software engineering principles with high-end design aesthetics.</p>
+                    
+                    <div class="skills-container">
+                        <span class="skill-pill">Full-Stack Development</span>
+                        <span class="skill-pill">Creative Coding</span>
+                        <span class="skill-pill">UI/UX Design</span>
+                        <span class="skill-pill">Performance Optimization</span>
+                        <span class="skill-pill">Generative AI Integration</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section class="section projects" id="projects">
+            <div class="projects-header reveal">
+                <div class="section-label">02 // Selected Work</div>
+                <h2 class="section-title">Digital Creations.</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="projects-grid">
+                <!-- Project 1 -->
+                <article class="project-card reveal" data-project="aurora-weather">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-weather.png" alt="Aurora Weather thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/aurora-weather/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.01</div>
+                        <h3 class="project-name">Aurora Weather</h3>
+                        <p class="project-desc">A premium weather dashboard featuring animated atmospheric backgrounds and real-time API integrations.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">HTML5</span>
+                            <span class="project-tag">CSS3</span>
+                            <span class="project-tag">Vanilla JS</span>
+                            <span class="project-tag">REST API</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 2 -->
+                <article class="project-card reveal" data-project="nexus-dashboard">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-dashboard.png" alt="Nexus Dashboard thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/nexus-dashboard/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.02</div>
+                        <h3 class="project-name">Nexus Dashboard</h3>
+                        <p class="project-desc">A sophisticated data visualization dashboard utilizing custom canvas charts and a sleek bento-grid layout.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Canvas API</span>
+                            <span class="project-tag">Bento UI</span>
+                            <span class="project-tag">Data Viz</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 3 -->
+                <article class="project-card reveal" data-project="crystal-music">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-music.png" alt="Crystal Music thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/crystal-music/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.03</div>
+                        <h3 class="project-name">Crystal Music</h3>
+                        <p class="project-desc">An audio-reactive visualizer that translates sound frequencies into dynamic, crystalline geometric structures.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Web Audio API</span>
+                            <span class="project-tag">Canvas Animations</span>
+                            <span class="project-tag">Creative Coding</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 4 -->
+                <article class="project-card reveal" data-project="prism-gallery">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-gallery.png" alt="Prism Gallery thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/prism-gallery/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.04</div>
+                        <h3 class="project-name">Prism Gallery</h3>
+                        <p class="project-desc">A high-end editorial image gallery with smooth masonry layouts, 3D card transforms, and fluid filtering.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Masonry</span>
+                            <span class="project-tag">3D Transforms</span>
+                            <span class="project-tag">Intersection Observer</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 5 -->
+                <article class="project-card reveal" data-project="quantum-notes">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-notes.png" alt="Quantum Notes thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/quantum-notes/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.05</div>
+                        <h3 class="project-name">Quantum Notes</h3>
+                        <p class="project-desc">A premium markdown note-taking application featuring live preview, persistence, and a minimalist luxury aesthetic.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Local Storage</span>
+                            <span class="project-tag">Markdown Parser</span>
+                            <span class="project-tag">State Management</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 6 -->
+                <article class="project-card reveal" data-project="flux-chat">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-chat.png" alt="Flux Chat thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/flux-chat/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.06</div>
+                        <h3 class="project-name">Flux Chat</h3>
+                        <p class="project-desc">A beautifully crafted simulated chat interface with smooth message animations, typing indicators, and a clean modern UI.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">UI/UX</span>
+                            <span class="project-tag">Micro-animations</span>
+                            <span class="project-tag">DOM Manipulation</span>
+                        </div>
+                    </div>
+                </article>
+                
+                <!-- Project 7 -->
+                <article class="project-card reveal" data-project="stellar-shop">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-ecommerce.png" alt="Stellar E-Commerce thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/stellar-shop/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.07</div>
+                        <h3 class="project-name">Stellar Shop</h3>
+                        <p class="project-desc">A high-end interactable 3D product configurator and sleek e-commerce interface simulation.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">CSS 3D Transforms</span>
+                            <span class="project-tag">E-Commerce UI</span>
+                            <span class="project-tag">Micro-animations</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 8 -->
+                <article class="project-card reveal" data-project="lumina-ai">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-ai.png" alt="Lumina AI Studio thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/lumina-ai/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.08</div>
+                        <h3 class="project-name">Lumina AI Studio</h3>
+                        <p class="project-desc">A mock generative AI workspace with a glowing interactive prompt bar and animated processing states.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Interaction Design</span>
+                            <span class="project-tag">State Simulation</span>
+                            <span class="project-tag">CSS Animations</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 9 -->
+                <article class="project-card reveal" data-project="zenith-wallet">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-wallet.png" alt="Zenith Wallet thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/zenith-wallet/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.09</div>
+                        <h3 class="project-name">Zenith Wallet</h3>
+                        <p class="project-desc">An elite crypto/finance dashboard featuring an interactive 3D glassmorphism credit card and live charts.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Glassmorphism</span>
+                            <span class="project-tag">Chart.js</span>
+                            <span class="project-tag">Fintech UI</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 10 -->
+                <article class="project-card reveal" data-project="aero-tracker">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-aero.png" alt="Aero Flight Tracker thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/aero-tracker/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.10</div>
+                        <h3 class="project-name">Aero Tracker</h3>
+                        <p class="project-desc">A stunning flight tracking data visualization dashboard built with a custom canvas-rendered dot-matrix globe.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Canvas Rendering</span>
+                            <span class="project-tag">Data Visualization</span>
+                            <span class="project-tag">3D Geometry</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 11 -->
+                <article class="project-card reveal" data-project="ethereal-fluid">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-fluid.png" alt="Ethereal Fluid thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/ethereal-fluid/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.11</div>
+                        <h3 class="project-name">Ethereal Fluid</h3>
+                        <p class="project-desc">A generative art masterpiece featuring a metallic liquid simulation ribbon that reacts to cursor proximity.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Creative Coding</span>
+                            <span class="project-tag">Fluid Dynamics</span>
+                            <span class="project-tag">HTML5 Canvas</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 12 -->
+                <article class="project-card reveal" data-project="nova-vault">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-vault.png" alt="Nova Vault thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/nova-vault/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.12</div>
+                        <h3 class="project-name">Nova Vault</h3>
+                        <p class="project-desc">A high-end glassmorphic passkey security vault with sleek unlock micro-animations.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Cryptography</span>
+                            <span class="project-tag">Cyber Security UI</span>
+                            <span class="project-tag">Glassmorphism</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 13 -->
+                <article class="project-card reveal" data-project="chronos-timeline">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-timeline.png" alt="Chronos Timeline thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/chronos-timeline/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.13</div>
+                        <h3 class="project-name">Chronos Timeline</h3>
+                        <p class="project-desc">A smooth horizontal productivity timeline with magnetic interactions and GSAP animations.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Productivity UI</span>
+                            <span class="project-tag">Horizontal Scroll</span>
+                            <span class="project-tag">GSAP</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 14 -->
+                <article class="project-card reveal" data-project="apex-metrics">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-metrics.png" alt="Apex Metrics thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/apex-metrics/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.14</div>
+                        <h3 class="project-name">Apex Metrics</h3>
+                        <p class="project-desc">A sleek fitness and activity tracker using animated metallic ring charts and clean data visualization.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">SVG Animations</span>
+                            <span class="project-tag">HealthTech</span>
+                            <span class="project-tag">Data Viz</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 15 -->
+                <article class="project-card reveal" data-project="echo-sphere">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-sphere.png" alt="Echo Sphere thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/echo-sphere/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.15</div>
+                        <h3 class="project-name">Echo Sphere</h3>
+                        <p class="project-desc">A generative 3D particle sphere rendered in Canvas that reacts to cursor proximity.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">HTML5 Canvas</span>
+                            <span class="project-tag">3D Geometry</span>
+                            <span class="project-tag">Creative Coding</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 16 -->
+                <article class="project-card reveal" data-project="oasis-cartography">
+                    <div class="project-image-wrapper">
+                        <img src="assets/project-map.png" alt="Oasis Cartography thumbnail" class="project-image">
+                        <div class="project-overlay">
+                            <button class="project-overlay-btn hover-target" onclick="openProjectModal('projects/oasis-cartography/index.html')">View Demo</button>
+                        </div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-number">PROJECT.16</div>
+                        <h3 class="project-name">Oasis Cartography</h3>
+                        <p class="project-desc">A stylized monochrome digital map interface featuring spatial tracking and grid UI.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Geo-Spatial UI</span>
+                            <span class="project-tag">Interactive Design</span>
+                            <span class="project-tag">CSS Grid</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Tech Stack Section -->
+        <section class="section tech-stack" id="tech">
+            <div class="reveal">
+                <div class="section-label">03 // Arsenal</div>
+                <h2 class="section-title">Core Technologies.</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="tech-grid reveal">
+                <!-- Frontend -->
+                <div class="tech-category">
+                    <h3 class="tech-category-title">Frontend</h3>
+                    <div class="tech-items">
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">📱</div>
+                            <span class="tech-name">HTML5 / CSS3 / SCSS</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">⚡</div>
+                            <span class="tech-name">JavaScript (ES6+)</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">⚛️</div>
+                            <span class="tech-name">React / Next.js</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">🎨</div>
+                            <span class="tech-name">Tailwind CSS / GSAP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backend -->
+                <div class="tech-category">
+                    <h3 class="tech-category-title">Backend</h3>
+                    <div class="tech-items">
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">🟢</div>
+                            <span class="tech-name">Node.js / Express</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">🐍</div>
+                            <span class="tech-name">Python / Django</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">🗄️</div>
+                            <span class="tech-name">PostgreSQL / MongoDB</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">☁️</div>
+                            <span class="tech-name">Supabase / Firebase</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tools & AI -->
+                <div class="tech-category">
+                    <h3 class="tech-category-title">Tools & AI</h3>
+                    <div class="tech-items">
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">🛠️</div>
+                            <span class="tech-name">Git / GitHub / CI/CD</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">🤖</div>
+                            <span class="tech-name">LLM Integration (Gemini/OpenAI)</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">⚙️</div>
+                            <span class="tech-name">Apify / Web Scraping</span>
+                        </div>
+                        <div class="tech-item hover-target">
+                            <div class="tech-icon">🎨</div>
+                            <span class="tech-name">Figma / Web Design</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="section contact" id="contact">
+            <div class="contact-wrapper reveal">
+                <div class="section-label">04 // Initiate connection</div>
+                <h2 class="section-title">Let's Build the Future.</h2>
+                <div class="section-divider" style="margin: 0 auto 2rem; background: linear-gradient(90deg, transparent, var(--silver-metallic), transparent);"></div>
+                
+                <p class="contact-subtitle">Whether you have a visionary project in mind or simply want to explore possibilities, my inbox is open.</p>
+                
+                <a href="mailto:subuhaaan@gmail.com" class="contact-email hover-target">subuhaaan@gmail.com</a>
+                
+                <div class="contact-socials">
+                    <a href="#" class="social-link hover-target">
+                        LinkedIn
+                    </a>
+                    <a href="#" class="social-link hover-target">
+                        GitHub
+                    </a>
+                    <a href="#" class="social-link hover-target">
+                        Twitter / X
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Subuhan. Designed and engineered for the modern web.</p>
+    </footer>
+
+    <!-- Project Modal Container -->
+    <div class="project-modal" id="project-modal">
+        <button class="project-modal-close" id="modal-close" aria-label="Close modal">✕</button>
+        <iframe id="project-iframe" src="" title="Project Demo"></iframe>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/cursor.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

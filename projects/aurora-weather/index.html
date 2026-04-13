@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Weather</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff;
+            color: #1a1918;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Animated Background Gradient */
+        .atm-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: linear-gradient(120deg, #f8f7f4, #d4d0cb, #f0ede8);
+            background-size: 200% 200%;
+            animation: gradientMove 15s ease infinite;
+        }
+        
+        /* Aurora effect overlay */
+        .aurora {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            opacity: 0.4;
+            background-image: 
+                radial-gradient(ellipse at 20% 0%, rgba(143, 168, 184, 0.4) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 0%, rgba(196, 168, 130, 0.2) 0%, transparent 50%);
+            filter: blur(40px);
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 30px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .city {
+            font-size: 2.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+        }
+
+        .date {
+            color: #8a8580;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .main-temp {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .temp {
+            font-size: 6rem;
+            font-weight: 300;
+            line-height: 1;
+            letter-spacing: -0.05em;
+        }
+
+        .desc {
+            font-size: 1.2rem;
+            color: #3a3835;
+            font-weight: 500;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .detail-card {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: #8a8580;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .loading {
+            position: absolute;
+            inset: 0;
+            background: white;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            letter-spacing: 0.2em;
+            transition: opacity 0.5s;
+        }
+
+        /* Weather Icon */
+        .w-icon {
+            width: 80px;
+            height: 80px;
+            background: #f0ede8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="loading" id="loader">GATHERING ATMOSPHERIC DATA...</div>
+    
+    <div class="atm-bg"></div>
+    <div class="aurora"></div>
+
+    <div class="container">
+        <div class="glass-panel">
+            <header class="header">
+                <div>
+                    <h1 class="city" id="city">Stockholm</h1>
+                    <div class="date" id="date">MONDAY, 14 OCT 2026</div>
+                </div>
+                <div class="w-icon" id="icon">☀️</div>
+            </header>
+
+            <div class="main-temp">
+                <div class="temp" id="temp">24°</div>
+                <div class="desc" id="desc">Clear Skies<br>Perfect condition</div>
+            </div>
+
+            <div class="details">
+                <div class="detail-card">
+                    <div class="detail-label">Humidity</div>
+                    <div class="detail-value" id="humidity">45%</div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-label">Wind</div>
+                    <div class="detail-value" id="wind">12 km/h</div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-label">Pressure</div>
+                    <div class="detail-value" id="pressure">1014 hPa</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate API fetch for demo purposes
+        setTimeout(() => {
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+            }, 500);
+            
+            // Set current date
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('date').textContent = new Date().toLocaleDateString('en-US', options).toUpperCase();
+        }, 1500);
+
+        // Optional: Can integrate real OpenMeteo API here if desired
+        /*
+        fetch('https://api.open-meteo.com/v1/forecast?latitude=59.3293&longitude=18.0686&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,snowfall,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m')
+            .then(res => res.json())
+            .then(data => {
+                const current = data.current;
+                document.getElementById('temp').textContent = Math.round(current.temperature_2m) + '°';
+                document.getElementById('humidity').textContent = current.relative_humidity_2m + '%';
+                document.getElementById('wind').textContent = current.wind_speed_10m + ' km/h';
+                document.getElementById('pressure').textContent = Math.round(current.surface_pressure) + ' hPa';
+                // map weather_code to icon...
+            });
+        */
+    </script>
+</body>
+</html>
